@@ -3,9 +3,7 @@ from datetime import datetime
 from peewee import Model, DateTimeField
 from peewee_async import PostgresqlDatabase
 
-from settings import DATABASE
-
-database = PostgresqlDatabase(**DATABASE)
+database = PostgresqlDatabase(None)
 
 class BaseModel(Model):
     created = DateTimeField(formats='%Y-%m-%d %H:%M:%S', default=datetime.utcnow)
