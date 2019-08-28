@@ -11,7 +11,6 @@ from aiohttp_session.redis_storage import RedisStorage
 from db import database
 from utils.middlewares import request_user_middleware
 from settings import REDIS_CON, DATABASE
-
 from views import Test, WebSocket, LogInView
 
 router = UrlDispatcher()

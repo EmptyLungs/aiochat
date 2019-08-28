@@ -1,6 +1,8 @@
-from aiohttp import web, WSMsgType
-from models import Message, User
 from time import time
+
+from aiohttp import web, WSMsgType
+
+from models import Message, User
 
 
 class BaseView(web.View):
