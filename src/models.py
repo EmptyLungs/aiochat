@@ -1,4 +1,4 @@
-from peewee import CharField
+from peewee import CharField, TextField, ForeignKeyField
 
 from db import BaseModel
 
@@ -7,3 +7,8 @@ class User(BaseModel):
     # plaintext password yaaa
     # TODO: passlib.hash - sha256_crypt.verify(password, hash)
     password = CharField(max_length=20)
+
+
+class Message(BaseModel):
+    text = TextField()
+    user = ForeignKeyField(rel_model=User, related_name='messages', on_delete='CASCADE')

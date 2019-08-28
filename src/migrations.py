@@ -1,17 +1,17 @@
 import asyncio
 
-from server import start_app
-from models import User
+import peewee_async
 
-loop = asyncio.get_event_loop()
-server_gen, handler, app = loop.run_until_complete(start_app(loop))
+from models import User, Message
+from db import database
+from settings import DATABASE
 
-with app.objects.allow_sync():
+database.init(**DATABASE)
+manager = peewee_async.Manager(database)
+
+with manager.allow_sync():
     User.create_table(True)
+    Message.create_table(True)
     
     for username in ['User1', 'User2', 'User3']:
-        try:
-            User.create(username=user, password='123')
-        except:
-            # meh
-            pass
+        User.create(username=username, password='123')
