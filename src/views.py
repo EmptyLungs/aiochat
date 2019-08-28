@@ -3,27 +3,32 @@ from models import Message, User
 from time import time
 
 
-class Test(web.View):
+class BaseView(web.View):
+    login_required = False
+    async def _iter(self):
+        if self.login_required and self.request.user is None:
+            return web.HTTPUnauthorized()
+        return await super()._iter()
+
+
+class Test(BaseView):
     async def get(self):
         return web.json_response({"data": {"message": "Hello World!"}})
 
 
-class WebSocket(web.View):
+class WebSocket(BaseView):
+    login_required = True
     async def get(self):
-        #if self.request.user == None:
-        #    return web.HTTPUnauthorized()
-        print(self.request.user.username)
         ws = web.WebSocketResponse()
         await ws.prepare(self.request)
         async for msg in ws:
             if msg.type == WSMsgType.TEXT:
                 if msg.data == 'close':
-                    print('connection closed')
                     await ws.close()
                 else:
                     await ws.send_str(msg.data + '/answer')
             elif (msg.type == WSMsgType.ERROR):
-                print('ws connection error: {}'.format(ws.exception()))
+                self.request.app.logger.dubg('ws connection error: {}'.format(ws.exception()))
         return ws
 
 
@@ -33,7 +38,6 @@ class LogInView(web.View):
         app = self.request.app
         username = data.get('username')
         password = data.get('password')
-        print(username,password)
         if not username or not password:
             return web.HTTPBadRequest()
         try:
