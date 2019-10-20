@@ -19,7 +19,7 @@ router = UrlDispatcher()
 loop = asyncio.get_event_loop()
 redis_pool = loop.run_until_complete(aioredis.create_pool(REDIS_CON, loop=loop))
 middlewares = [session_middleware(RedisStorage(redis_pool=redis_pool, cookie_name='aiochat_session_id', 
-                                               max_age=24*60*60, domain="localhost", httponly=False)), 
+                                               max_age=24*60*60, domain="192.168.0.101", httponly=False, secure=False)), 
                request_user_middleware]
 app = web.Application(router=router, middlewares=middlewares)
 

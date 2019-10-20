@@ -24,7 +24,6 @@ class ChatRoom(BaseModel):
         return await objects.prefetch(self.messages, User.select())
 
     def as_dict(self):
-        print(self)
         return {
             "id": self.id,
             "name": self.name,
@@ -36,9 +35,6 @@ class Message(BaseModel):
     text = TextField()
     user = ForeignKeyField(rel_model=User, related_name='messages', on_delete='CASCADE', null=True)
     room = ForeignKeyField(rel_model=ChatRoom, related_name='messages', on_delete='CASCADE')
-
-    class Meta:
-        order_by = ('created',)
 
     def as_dict(self):
         return {

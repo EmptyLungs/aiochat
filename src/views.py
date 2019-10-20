@@ -2,6 +2,7 @@ from time import time
 import uuid
 
 from aiohttp import web, WSMsgType
+from peewee import JOIN_FULL
 
 from models import Message, User, ChatRoom
 
@@ -20,7 +21,7 @@ class Test(BaseView):
 
 
 class WebSocket(BaseView):
-    login_required = True
+    # login_required = True
     async def get(self):
         app = self.request.app
         user = self.request.user
@@ -30,6 +31,13 @@ class WebSocket(BaseView):
             return web.HTTPNotFound()
         ws = web.WebSocketResponse()
         await ws.prepare(self.request)
+
+        last_messages = await app.objects.execute(
+            Message.select(Message, User).join(User, JOIN_FULL). \
+            where(Message.room == self.room).order_by(Message.created.desc()).limit(20))
+        json_messages = list(map(Message.as_dict, last_messages))
+        json_messages.reverse()
+        await self.send_last_messages(json_messages, ws)
 
         if self.room.id not in app.ws_connections:
             app.ws_connections[self.room.id] = {}
@@ -54,15 +62,17 @@ class WebSocket(BaseView):
 
     async def broadcast(self, message):
         for conn in self.request.app.ws_connections[self.room.id].values():
-            print(conn)
             await conn.send_json(message.as_dict())
             # await conn.send_str(message.text)
+
+    async def send_last_messages(self, messages, ws):
+        for message in messages:
+            await ws.send_json(message)
 
 class LogInView(BaseView):
     async def post(self):
         data = await self.request.json()
         app = self.request.app
-        print(data)
         username = data.get('username')
         password = data.get('password')
         if not username or not password:
